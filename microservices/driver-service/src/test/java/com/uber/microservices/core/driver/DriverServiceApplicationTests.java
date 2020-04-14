@@ -42,24 +42,24 @@ public class DriverServiceApplicationTests {
 	@Before
 	public void setupDb() {
 		input = (AbstractMessageChannel) channels.input();
-		repository.deleteAll().block();
+		repository.deleteAll();
 	}
 
 	@Test
 	public void getDriverById() {
 
-		int driverID = 1;
+		int driverId = 1;
 
-		assertNull(repository.findByDriverId(driverID).block());
-		assertEquals(0, (long)repository.count().block());
+		assertFalse(repository.findByDriverId(driverId).isPresent());
+		assertEquals(0, (long)repository.count());
 
-		sendCreateDriverEvent(driverID);
+		sendCreateDriverEvent(driverId);
 
-		assertNotNull(repository.findByDriverId(driverID).block());
-		assertEquals(1, (long)repository.count().block());
+		assertNotNull(repository.findByDriverId(driverId));
+		assertEquals(1, (long)repository.count());
 
-		getAndVerifyDriver("/" + String.valueOf(driverID), OK)
-            .jsonPath("$.driverId").isEqualTo(driverID);
+		getAndVerifyDriver("/" + String.valueOf(driverId), OK)
+            .jsonPath("$.driverId").isEqualTo(driverId);
 	}
 
 	@Test
@@ -67,11 +67,11 @@ public class DriverServiceApplicationTests {
 
 		int driverId = 1;
 
-		assertNull(repository.findByDriverId(driverId).block());
+		assertFalse(repository.findByDriverId(driverId).isPresent());
 
 		sendCreateDriverEvent(driverId);
 
-		assertNotNull(repository.findByDriverId(driverId).block());
+		assertNotNull(repository.findByDriverId(driverId));
 
 		try {
 			sendCreateDriverEvent(driverId);
@@ -92,10 +92,10 @@ public class DriverServiceApplicationTests {
 		int driverId = 1;
 
 		sendCreateDriverEvent(driverId);
-		assertNotNull(repository.findByDriverId(driverId).block());
+		assertNotNull(repository.findByDriverId(driverId));
 
 		sendDeleteDriverEvent(driverId);
-		assertNull(repository.findByDriverId(driverId).block());
+		assertFalse(repository.findByDriverId(driverId).isPresent());
 
 		sendDeleteDriverEvent(driverId);
 	}

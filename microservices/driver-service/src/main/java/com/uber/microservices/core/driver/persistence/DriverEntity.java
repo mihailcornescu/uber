@@ -26,11 +26,10 @@ public class DriverEntity {
     public DriverEntity() {
     }
 
-    public DriverEntity(int driverId, String name, String phoneNo, String serviceAddress) {
+    public DriverEntity(int driverId, String name, String phoneNo) {
         this.driverId = driverId;
         this.name = name;
         this.phoneNo = phoneNo;
-        this.serviceAddress = serviceAddress;
     }
 
     @Override
@@ -76,13 +75,5 @@ public class DriverEntity {
 
     public void setPhoneNo(String phoneNo) {
         this.phoneNo = phoneNo;
-    }
-
-    public String getServiceAddress() {
-        return serviceAddress;
-    }
-
-    public void setServiceAddress(String serviceAddress) {
-        this.serviceAddress = serviceAddress;
     }
 }

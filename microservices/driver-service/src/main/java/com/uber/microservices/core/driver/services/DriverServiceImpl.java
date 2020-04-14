@@ -7,14 +7,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.RestController;
-import reactor.core.publisher.Mono;
 import com.uber.api.core.driver.Driver;
 import com.uber.api.core.driver.DriverService;
 import com.uber.util.exceptions.InvalidInputException;
 import com.uber.util.exceptions.NotFoundException;
 import com.uber.util.http.ServiceUtil;
-
-import static reactor.core.publisher.Mono.error;
 
 @RestController
 public class DriverServiceImpl implements DriverService {
@@ -36,38 +33,36 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public Driver createDriver(Driver body) {
+        try {
+            DriverEntity entity = mapper.apiToEntity(body);
+            DriverEntity newEntity = repository.save(entity);
 
-        if (body.getDriverId() < 1) throw new InvalidInputException("Invalid driverId: " + body.getDriverId());
+            LOG.debug("createProduct: entity created for driverId: {}", body.getDriverId());
+            return mapper.entityToApi(newEntity);
 
-        DriverEntity entity = mapper.apiToEntity(body);
-        Mono<Driver> newEntity = repository.save(entity)
-            .log()
-            .onErrorMap(
-                DuplicateKeyException.class,
-                ex -> new InvalidInputException("Duplicate key, Driver Id: " + body.getDriverId()))
-            .map(e -> mapper.entityToApi(e));
-
-        return newEntity.block();
-    }
+        } catch (DuplicateKeyException dke) {
+            throw new InvalidInputException("Duplicate key, Driver Id: " + body.getDriverId());
+        }    }
 
     @Override
-    public Mono<Driver> getDriver(int driverId) {
+    public Driver getDriver(int driverId) {
 
         if (driverId < 1) throw new InvalidInputException("Invalid driverId: " + driverId);
 
-        return repository.findByDriverId(driverId)
-            .switchIfEmpty(error(new NotFoundException("No driver found for driverId: " + driverId)))
-            .log()
-            .map(e -> mapper.entityToApi(e))
-            .map(e -> {e.setServiceAddress(serviceUtil.getServiceAddress()); return e;});
+        DriverEntity entity = repository.findByDriverId(driverId)
+                .orElseThrow(() -> new NotFoundException("No driver found for driverId: " + driverId));
+
+        Driver response = mapper.entityToApi(entity);
+        response.setServiceAddress(serviceUtil.getServiceAddress());
+
+        LOG.debug("getDriver: found driverId: {}", response.getDriverId());
+
+        return response;
     }
 
     @Override
     public void deleteDriver(int driverId) {
-
-        if (driverId < 1) throw new InvalidInputException("Invalid driverId: " + driverId);
-
-        LOG.debug("deleteDriver: tries to delete an entity with driverId: {}", driverId);
-        repository.findByDriverId(driverId).log().map(e -> repository.delete(e)).flatMap(e -> e).block();
+        LOG.debug("deleteProduct: tries to delete an entity with productId: {}", driverId);
+        repository.findByDriverId(driverId).ifPresent(e -> repository.delete(e));
     }
 }
