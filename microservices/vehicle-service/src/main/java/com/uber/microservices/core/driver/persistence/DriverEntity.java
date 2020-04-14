@@ -1,0 +1,78 @@
+package com.uber.microservices.core.driver.persistence;
+
+import org.springframework.data.annotation.Id;
+import org.springframework.data.annotation.Version;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import static java.lang.String.format;
+
+@Document(collection="products")
+public class DriverEntity {
+
+    @Id
+    private String id;
+
+    @Version
+    private Integer version;
+
+    @Indexed(unique = true)
+    private int driverId;
+
+    private String name;
+    private String phoneNo;
+
+    public DriverEntity() {
+    }
+
+    public DriverEntity(int driverId, String name, String phoneNo) {
+        this.driverId = driverId;
+        this.name = name;
+        this.phoneNo = phoneNo;
+    }
+
+    @Override
+    public String toString() {
+        return format("DriverEntity: %s", driverId);
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public Integer getVersion() {
+        return version;
+    }
+
+    public int getDriverId() {
+        return driverId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setVersion(Integer version) {
+        this.version = version;
+    }
+
+    public void setDriverId(int driverId) {
+        this.driverId = driverId;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPhoneNo() {
+        return phoneNo;
+    }
+
+    public void setPhoneNo(String phoneNo) {
+        this.phoneNo = phoneNo;
+    }
+}
