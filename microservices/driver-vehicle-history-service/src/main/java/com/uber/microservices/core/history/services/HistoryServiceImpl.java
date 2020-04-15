@@ -42,7 +42,7 @@ public class HistoryServiceImpl implements HistoryService {
             .log()
             .onErrorMap(
                 DuplicateKeyException.class,
-                ex -> new InvalidInputException("Duplicate key, Driver Id: " + body.getDriverId() + ", History Id:" + body.getVehicleId()))
+                ex -> new InvalidInputException("Duplicate key, Vehicle Id: " + body.getDriverId() + ", History Id:" + body.getVehicleId()))
             .map(e -> mapper.entityToApi(e));
 
         return newEntity;

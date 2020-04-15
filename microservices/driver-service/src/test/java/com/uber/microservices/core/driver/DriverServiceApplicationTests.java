@@ -142,7 +142,7 @@ public class DriverServiceApplicationTests {
 	}
 
 	private void sendCreateDriverEvent(int driverID) {
-		Driver driver = new Driver(driverID, "Name " + driverID, "0732", "0732");
+		Driver driver = new Driver(driverID, "Name " + driverID, "0732");
 		Event<Integer, Driver> event = new Event(CREATE, driverID, driver);
 		input.send(new GenericMessage<>(event));
 	}

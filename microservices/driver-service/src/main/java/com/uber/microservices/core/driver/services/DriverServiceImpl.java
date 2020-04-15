@@ -37,7 +37,7 @@ public class DriverServiceImpl implements DriverService {
             DriverEntity entity = mapper.apiToEntity(body);
             DriverEntity newEntity = repository.save(entity);
 
-            LOG.debug("createProduct: entity created for driverId: {}", body.getDriverId());
+            LOG.debug("createDriver: entity created for driverId: {}", body.getDriverId());
             return mapper.entityToApi(newEntity);
 
         } catch (DuplicateKeyException dke) {
@@ -53,7 +53,6 @@ public class DriverServiceImpl implements DriverService {
                 .orElseThrow(() -> new NotFoundException("No driver found for driverId: " + driverId));
 
         Driver response = mapper.entityToApi(entity);
-        response.setServiceAddress(serviceUtil.getServiceAddress());
 
         LOG.debug("getDriver: found driverId: {}", response.getDriverId());
 
@@ -62,7 +61,7 @@ public class DriverServiceImpl implements DriverService {
 
     @Override
     public void deleteDriver(int driverId) {
-        LOG.debug("deleteProduct: tries to delete an entity with productId: {}", driverId);
+        LOG.debug("deleteDriver: tries to delete an entity with driverId: {}", driverId);
         repository.findByDriverId(driverId).ifPresent(e -> repository.delete(e));
     }
 }

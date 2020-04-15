@@ -1,4 +1,4 @@
-package com.uber.microservices.core.driver;
+package com.uber.microservices.core.vehicle;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,13 +9,13 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan("com.uber")
-public class ProductServiceApplication {
+public class VehicleServiceApplication {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ProductServiceApplication.class);
+	private static final Logger LOG = LoggerFactory.getLogger(VehicleServiceApplication.class);
 
 	public static void main(String[] args) {
 
-		ConfigurableApplicationContext ctx = SpringApplication.run(ProductServiceApplication.class, args);
+		ConfigurableApplicationContext ctx = SpringApplication.run(VehicleServiceApplication.class, args);
 
 		String mongodDbHost = ctx.getEnvironment().getProperty("spring.data.mongodb.host");
 		String mongodDbPort = ctx.getEnvironment().getProperty("spring.data.mongodb.port");

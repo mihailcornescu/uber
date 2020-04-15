@@ -4,20 +4,17 @@ public class Driver {
     private int driverId;
     private String name;
     private String phoneNo;
-    private String serviceAddress;
 
     public Driver() {
         driverId = 0;
         name = null;
         phoneNo = null;
-        serviceAddress = null;
     }
 
-    public Driver(int driverId, String name, String phoneNo, String serviceAddress) {
+    public Driver(int driverId, String name, String phoneNo) {
         this.driverId = driverId;
         this.name = name;
         this.phoneNo = phoneNo;
-        this.serviceAddress = serviceAddress;
     }
 
     public int getDriverId() {
@@ -44,11 +41,4 @@ public class Driver {
         this.phoneNo = phoneNo;
     }
 
-    public String getServiceAddress() {
-        return serviceAddress;
-    }
-
-    public void setServiceAddress(String serviceAddress) {
-        this.serviceAddress = serviceAddress;
-    }
 }

@@ -8,7 +8,6 @@ import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.cloud.stream.messaging.Sink;
 import com.uber.api.core.driver.Driver;
-import com.uber.api.core.driver.DriverService;
 import com.uber.api.event.Event;
 import com.uber.util.exceptions.EventProcessingException;
 

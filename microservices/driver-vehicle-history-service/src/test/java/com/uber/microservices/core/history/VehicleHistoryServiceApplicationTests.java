@@ -28,7 +28,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=RANDOM_PORT, properties = {"spring.data.mongodb.port: 0", "eureka.client.enabled=false"})
-public class DriverHistoryServiceApplicationTests {
+public class VehicleHistoryServiceApplicationTests {
 
 	@Autowired
 	private WebTestClient client;
@@ -80,7 +80,7 @@ public class DriverHistoryServiceApplicationTests {
 		} catch (MessagingException me) {
 			if (me.getCause() instanceof InvalidInputException)	{
 				InvalidInputException iie = (InvalidInputException)me.getCause();
-				assertEquals("Duplicate key, Driver Id: 1, History Id:1", iie.getMessage());
+				assertEquals("Duplicate key, Vehicle Id: 1, History Id:1", iie.getMessage());
 			} else {
 				fail("Expected a InvalidInputException as the root cause!");
 			}

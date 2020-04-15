@@ -21,7 +21,6 @@ public class DriverEntity {
 
     private String name;
     private String phoneNo;
-    private String serviceAddress;
 
     public DriverEntity() {
     }

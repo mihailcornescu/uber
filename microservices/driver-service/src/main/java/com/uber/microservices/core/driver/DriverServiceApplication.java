@@ -9,13 +9,13 @@ import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
 @ComponentScan("com.uber")
-public class ProductServiceApplication {
+public class DriverServiceApplication {
 
-	private static final Logger LOG = LoggerFactory.getLogger(ProductServiceApplication.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DriverServiceApplication.class);
 
 	public static void main(String[] args) {
 
-		ConfigurableApplicationContext ctx = SpringApplication.run(ProductServiceApplication.class, args);
+		ConfigurableApplicationContext ctx = SpringApplication.run(DriverServiceApplication.class, args);
 
 		String mongodDbHost = ctx.getEnvironment().getProperty("spring.data.mongodb.host");
 		String mongodDbPort = ctx.getEnvironment().getProperty("spring.data.mongodb.port");

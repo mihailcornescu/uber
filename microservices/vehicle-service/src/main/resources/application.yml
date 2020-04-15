@@ -1,6 +1,6 @@
 server.port: 7001
 
-spring.application.name: driver
+spring.application.name: vehicle
 
 app.eureka-server: localhost
 
@@ -17,14 +17,14 @@ eureka:
 spring.data.mongodb:
   host: localhost
   port: 27017
-  database: driver-db
+  database: vehicle-db
 
 spring.cloud.stream:
   defaultBinder: rabbit
   default.contentType: application/json
   bindings.input:
-    destination: drivers
-    group: driversGroup
+    destination: vehicles
+    group: vehiclesGroup
 
 spring.cloud.stream.bindings.input.consumer:
   maxAttempts: 3

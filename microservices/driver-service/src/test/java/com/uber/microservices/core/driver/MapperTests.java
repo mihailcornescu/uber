@@ -17,7 +17,7 @@ public class MapperTests {
 
         assertNotNull(mapper);
 
-        Driver api = new Driver(1, "n", "pn", "sa");
+        Driver api = new Driver(1, "n", "pn");
 
         DriverEntity entity = mapper.apiToEntity(api);
 
