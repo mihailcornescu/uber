@@ -8,7 +8,7 @@ import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.ComponentScan;
 
 @SpringBootApplication
-@ComponentScan("se.magnus")
+@ComponentScan("com.uber")
 public class ProductServiceApplication {
 
 	private static final Logger LOG = LoggerFactory.getLogger(ProductServiceApplication.class);

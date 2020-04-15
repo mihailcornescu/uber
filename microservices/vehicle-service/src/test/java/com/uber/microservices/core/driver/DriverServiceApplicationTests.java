@@ -13,14 +13,14 @@ import org.springframework.messaging.MessagingException;
 import org.springframework.messaging.support.GenericMessage;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import com.uber.api.core.product.Product;
+import com.uber.api.core.driver.Driver;
 import com.uber.api.event.Event;
 import com.uber.util.exceptions.InvalidInputException;
 
 import static org.junit.Assert.*;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.*;
-import static org.springframework.http.MediaType.APPLICATION_JSON_UTF8;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static com.uber.api.event.Event.Type.CREATE;
 import static com.uber.api.event.Event.Type.DELETE;
 
@@ -42,44 +42,44 @@ public class DriverServiceApplicationTests {
 	@Before
 	public void setupDb() {
 		input = (AbstractMessageChannel) channels.input();
-		repository.deleteAll().block();
+		repository.deleteAll();
 	}
 
 	@Test
-	public void getProductById() {
+	public void getDriverById() {
 
-		int productId = 1;
+		int driverId = 1;
 
-		assertNull(repository.findByProductId(productId).block());
-		assertEquals(0, (long)repository.count().block());
+		assertFalse(repository.findByDriverId(driverId).isPresent());
+		assertEquals(0, (long)repository.count());
 
-		sendCreateProductEvent(productId);
+		sendCreateDriverEvent(driverId);
 
-		assertNotNull(repository.findByProductId(productId).block());
-		assertEquals(1, (long)repository.count().block());
+		assertNotNull(repository.findByDriverId(driverId));
+		assertEquals(1, (long)repository.count());
 
-		getAndVerifyProduct("/" + String.valueOf(productId), OK)
-            .jsonPath("$.paramId").isEqualTo(productId);
+		getAndVerifyDriver("/" + String.valueOf(driverId), OK)
+            .jsonPath("$.driverId").isEqualTo(driverId);
 	}
 
 	@Test
 	public void duplicateError() {
 
-		int productId = 1;
+		int driverId = 1;
 
-		assertNull(repository.findByProductId(productId).block());
+		assertFalse(repository.findByDriverId(driverId).isPresent());
 
-		sendCreateProductEvent(productId);
+		sendCreateDriverEvent(driverId);
 
-		assertNotNull(repository.findByProductId(productId).block());
+		assertNotNull(repository.findByDriverId(driverId));
 
 		try {
-			sendCreateProductEvent(productId);
+			sendCreateDriverEvent(driverId);
 			fail("Expected a MessagingException here!");
 		} catch (MessagingException me) {
 			if (me.getCause() instanceof InvalidInputException)	{
 				InvalidInputException iie = (InvalidInputException)me.getCause();
-				assertEquals("Duplicate key, Driver Id: " + productId, iie.getMessage());
+				assertEquals("Duplicate key, Driver Id: " + driverId, iie.getMessage());
 			} else {
 				fail("Expected a InvalidInputException as the root cause!");
 			}
@@ -87,68 +87,68 @@ public class DriverServiceApplicationTests {
 	}
 
 	@Test
-	public void deleteProduct() {
+	public void deleteDriver() {
 
-		int productId = 1;
+		int driverId = 1;
 
-		sendCreateProductEvent(productId);
-		assertNotNull(repository.findByProductId(productId).block());
+		sendCreateDriverEvent(driverId);
+		assertNotNull(repository.findByDriverId(driverId));
 
-		sendDeleteProductEvent(productId);
-		assertNull(repository.findByProductId(productId).block());
+		sendDeleteDriverEvent(driverId);
+		assertFalse(repository.findByDriverId(driverId).isPresent());
 
-		sendDeleteProductEvent(productId);
+		sendDeleteDriverEvent(driverId);
 	}
 
 	@Test
-	public void getProductInvalidParameterString() {
+	public void getDriverInvalidParameterString() {
 
-		getAndVerifyProduct("/no-integer", BAD_REQUEST)
-            .jsonPath("$.path").isEqualTo("/product/no-integer")
+		getAndVerifyDriver("/no-integer", BAD_REQUEST)
+            .jsonPath("$.path").isEqualTo("/driver/no-integer")
             .jsonPath("$.message").isEqualTo("Type mismatch.");
 	}
 
 	@Test
-	public void getProductNotFound() {
+	public void getDriverNotFound() {
 
-		int productIdNotFound = 13;
-		getAndVerifyProduct(productIdNotFound, NOT_FOUND)
-            .jsonPath("$.path").isEqualTo("/product/" + productIdNotFound)
-            .jsonPath("$.message").isEqualTo("No product found for productId: " + productIdNotFound);
+		int driverIdNotFound = 13;
+		getAndVerifyDriver(driverIdNotFound, NOT_FOUND)
+            .jsonPath("$.path").isEqualTo("/driver/" + driverIdNotFound)
+            .jsonPath("$.message").isEqualTo("No driver found for driverId: " + driverIdNotFound);
 	}
 
 	@Test
-	public void getProductInvalidParameterNegativeValue() {
+	public void getDriverInvalidParameterNegativeValue() {
 
-        int productIdInvalid = -1;
+        int driverIdInvalid = -1;
 
-		getAndVerifyProduct(productIdInvalid, UNPROCESSABLE_ENTITY)
-            .jsonPath("$.path").isEqualTo("/product/" + productIdInvalid)
-            .jsonPath("$.message").isEqualTo("Invalid productId: " + productIdInvalid);
+		getAndVerifyDriver(driverIdInvalid, UNPROCESSABLE_ENTITY)
+            .jsonPath("$.path").isEqualTo("/driver/" + driverIdInvalid)
+            .jsonPath("$.message").isEqualTo("Invalid driverId: " + driverIdInvalid);
 	}
 
-	private WebTestClient.BodyContentSpec getAndVerifyProduct(int productId, HttpStatus expectedStatus) {
-		return getAndVerifyProduct("/" + productId, expectedStatus);
+	private WebTestClient.BodyContentSpec getAndVerifyDriver(int driverId, HttpStatus expectedStatus) {
+		return getAndVerifyDriver("/" + driverId, expectedStatus);
 	}
 
-	private WebTestClient.BodyContentSpec getAndVerifyProduct(String productIdPath, HttpStatus expectedStatus) {
+	private WebTestClient.BodyContentSpec getAndVerifyDriver(String driverIdPath, HttpStatus expectedStatus) {
 		return client.get()
-			.uri("/product" + productIdPath)
-			.accept(APPLICATION_JSON_UTF8)
+			.uri("/driver" + driverIdPath)
+			.accept(APPLICATION_JSON)
 			.exchange()
 			.expectStatus().isEqualTo(expectedStatus)
-			.expectHeader().contentType(APPLICATION_JSON_UTF8)
+			.expectHeader().contentType(APPLICATION_JSON)
 			.expectBody();
 	}
 
-	private void sendCreateProductEvent(int productId) {
-		Product product = new Product(productId, "Name " + productId, productId, "SA");
-		Event<Integer, Product> event = new Event(CREATE, productId, product);
+	private void sendCreateDriverEvent(int driverID) {
+		Driver driver = new Driver(driverID, "Name " + driverID, "0732", "0732");
+		Event<Integer, Driver> event = new Event(CREATE, driverID, driver);
 		input.send(new GenericMessage<>(event));
 	}
 
-	private void sendDeleteProductEvent(int productId) {
-		Event<Integer, Product> event = new Event(DELETE, productId, null);
+	private void sendDeleteDriverEvent(int driverId) {
+		Event<Integer, Driver> event = new Event(DELETE, driverId, null);
 		input.send(new GenericMessage<>(event));
 	}
 }

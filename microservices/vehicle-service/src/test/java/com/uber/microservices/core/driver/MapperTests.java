@@ -4,7 +4,7 @@ import com.uber.microservices.core.driver.persistence.DriverEntity;
 import com.uber.microservices.core.driver.services.DriverMapper;
 import org.junit.Test;
 import org.mapstruct.factory.Mappers;
-import com.uber.api.core.product.Product;
+import com.uber.api.core.driver.Driver;
 
 import static org.junit.Assert.*;
 
@@ -17,19 +17,18 @@ public class MapperTests {
 
         assertNotNull(mapper);
 
-        Product api = new Product(1, "n", 1, "sa");
+        Driver api = new Driver(1, "n", "pn", "sa");
 
         DriverEntity entity = mapper.apiToEntity(api);
 
-        assertEquals(api.getProductId(), entity.getDriverId());
-        assertEquals(api.getProductId(), entity.getDriverId());
+        assertEquals(api.getDriverId(), entity.getDriverId());
         assertEquals(api.getName(), entity.getName());
+        assertEquals(api.getPhoneNo(), entity.getPhoneNo());
 
-        Product api2 = mapper.entityToApi(entity);
+        Driver api2 = mapper.entityToApi(entity);
 
-        assertEquals(api.getProductId(), api2.getProductId());
-        assertEquals(api.getProductId(), api2.getProductId());
+        assertEquals(api.getDriverId(), api2.getDriverId());
         assertEquals(api.getName(),      api2.getName());
-        assertNull(api2.getServiceAddress());
+        assertEquals(api.getPhoneNo(),      api2.getPhoneNo());
     }
 }

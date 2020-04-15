@@ -52,7 +52,7 @@ spring.rabbitmq:
 logging:
   level:
     root: INFO
-    se.magnus: DEBUG
+    com.uber: DEBUG
     org.springframework.data.mongodb.core.MongoTemplate: DEBUG
 
 management.endpoint.health.show-details: "ALWAYS"

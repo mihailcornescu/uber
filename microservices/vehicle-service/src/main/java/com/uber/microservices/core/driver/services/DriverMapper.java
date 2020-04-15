@@ -9,6 +9,9 @@ import com.uber.api.core.driver.Driver;
 @Mapper(componentModel = "spring")
 public interface DriverMapper {
 
+    @Mappings({
+            @Mapping(target = "serviceAddress", ignore = true)
+    })
     Driver entityToApi(DriverEntity entity);
 
     @Mappings({

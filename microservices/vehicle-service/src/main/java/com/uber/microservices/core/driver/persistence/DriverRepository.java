@@ -1,8 +1,9 @@
 package com.uber.microservices.core.driver.persistence;
 
-import org.springframework.data.repository.reactive.ReactiveCrudRepository;
-import reactor.core.publisher.Mono;
+import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface DriverRepository extends ReactiveCrudRepository<DriverEntity, String> {
-    Mono<DriverEntity> findByDriverId(int driverId);
+import java.util.Optional;
+
+public interface DriverRepository extends PagingAndSortingRepository<DriverEntity, String> {
+    Optional<DriverEntity> findByDriverId(int driverId);
 }

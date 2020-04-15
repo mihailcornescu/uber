@@ -7,7 +7,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import static java.lang.String.format;
 
-@Document(collection="products")
+@Document(collection="drivers")
 public class DriverEntity {
 
     @Id
@@ -21,6 +21,7 @@ public class DriverEntity {
 
     private String name;
     private String phoneNo;
+    private String serviceAddress;
 
     public DriverEntity() {
     }
