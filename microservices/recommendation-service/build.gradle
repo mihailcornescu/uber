@@ -15,7 +15,7 @@ apply plugin: 'eclipse'
 apply plugin: 'org.springframework.boot'
 apply plugin: 'io.spring.dependency-management'
 
-group = 'com.uber.microservices.core.driver'
+group = 'com.uber.microservices.core.recommendation'
 version = '1.0.0-SNAPSHOT'
 sourceCompatibility = 1.8
 
@@ -26,20 +26,17 @@ ext {
 
 repositories {
 	mavenCentral()
-    maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
+	maven { url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/' }
 }
 
 dependencies {
 	implementation project(':api')
 	implementation project(':util')
 	implementation('org.springframework.boot:spring-boot-starter-actuator')
-	implementation('org.springframework.boot:spring-boot-starter-webflux')
-	implementation('org.springframework.boot:spring-boot-starter-data-mongodb')
+	implementation('org.springframework.boot:spring-boot-starter-web')
+	implementation('org.springframework.boot:spring-boot-starter-data-mongodb-reactive')
 	implementation('org.springframework.cloud:spring-cloud-starter-stream-rabbit')
 	implementation('org.springframework.cloud:spring-cloud-starter-stream-kafka')
-	implementation('io.springfox:springfox-swagger2:3.0.0-SNAPSHOT')
-	implementation('io.springfox:springfox-swagger-ui:3.0.0-SNAPSHOT')
-	implementation('io.springfox:springfox-spring-webflux:3.0.0-SNAPSHOT')
 	implementation('org.springframework.cloud:spring-cloud-starter-netflix-eureka-client')
 	implementation("org.mapstruct:mapstruct:${mapstructVersion}")
 
@@ -49,7 +46,6 @@ dependencies {
 
 	testImplementation('org.springframework.boot:spring-boot-starter-test')
 	testImplementation('org.springframework.cloud:spring-cloud-stream-test-support')
-	testImplementation('io.projectreactor:reactor-test')
 	testImplementation('de.flapdoodle.embed:de.flapdoodle.embed.mongo')
 }
 

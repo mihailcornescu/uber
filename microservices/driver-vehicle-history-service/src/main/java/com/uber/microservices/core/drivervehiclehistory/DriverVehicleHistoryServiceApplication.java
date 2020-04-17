@@ -1,4 +1,4 @@
-package com.uber.microservices.core.vehicle;
+package com.uber.microservices.core.drivervehiclehistory;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,13 +11,12 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2WebFlux;
 @EnableSwagger2WebFlux
 @SpringBootApplication
 @ComponentScan("com.uber")
-public class VehicleServiceApplication {
+public class DriverVehicleHistoryServiceApplication {
 
-	private static final Logger LOG = LoggerFactory.getLogger(VehicleServiceApplication.class);
+	private static final Logger LOG = LoggerFactory.getLogger(DriverVehicleHistoryServiceApplication.class);
 
 	public static void main(String[] args) {
-
-		ConfigurableApplicationContext ctx = SpringApplication.run(VehicleServiceApplication.class, args);
+		ConfigurableApplicationContext ctx = SpringApplication.run(DriverVehicleHistoryServiceApplication.class, args);
 
 		String mongodDbHost = ctx.getEnvironment().getProperty("spring.data.mongodb.host");
 		String mongodDbPort = ctx.getEnvironment().getProperty("spring.data.mongodb.port");

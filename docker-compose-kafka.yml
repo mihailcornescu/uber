@@ -2,7 +2,7 @@ version: '2.1'
 
 services:
   product:
-    build: microservices/product-service
+    build: microservices/driver-service
     mem_limit: 350m
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -15,22 +15,8 @@ services:
       - kafka
       - mongodb
 
-  product-p1:
-    build: microservices/product-service
-    mem_limit: 350m
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - MANAGEMENT_HEALTH_RABBIT_ENABLED=false
-      - SPRING_CLOUD_STREAM_DEFAULTBINDER=kafka
-      - SPRING_CLOUD_STREAM_BINDINGS_INPUT_CONSUMER_PARTITIONED=true
-      - SPRING_CLOUD_STREAM_BINDINGS_INPUT_CONSUMER_INSTANCECOUNT=2
-      - SPRING_CLOUD_STREAM_BINDINGS_INPUT_CONSUMER_INSTANCEINDEX=1
-    depends_on:
-      - kafka
-      - mongodb
-
   recommendation:
-    build: microservices/recommendation-service
+    build: microservices/driver-vehicle-history-service
     mem_limit: 350m
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -44,7 +30,7 @@ services:
       - mongodb
 
   recommendation-p1:
-    build: microservices/recommendation-service
+    build: microservices/vehicle-service
     mem_limit: 350m
     environment:
       - SPRING_PROFILES_ACTIVE=docker
@@ -56,54 +42,6 @@ services:
     depends_on:
       - kafka
       - mongodb
-
-  review:
-    build: microservices/review-service
-    mem_limit: 350m
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - MANAGEMENT_HEALTH_RABBIT_ENABLED=false
-      - SPRING_CLOUD_STREAM_DEFAULTBINDER=kafka
-      - SPRING_CLOUD_STREAM_BINDINGS_INPUT_CONSUMER_PARTITIONED=true
-      - SPRING_CLOUD_STREAM_BINDINGS_INPUT_CONSUMER_INSTANCECOUNT=2
-      - SPRING_CLOUD_STREAM_BINDINGS_INPUT_CONSUMER_INSTANCEINDEX=0
-    depends_on:
-      mysql:
-        condition: service_healthy
-      kafka:
-        condition: service_started
-
-  review-p1:
-    build: microservices/review-service
-    mem_limit: 350m
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - MANAGEMENT_HEALTH_RABBIT_ENABLED=false
-      - SPRING_CLOUD_STREAM_DEFAULTBINDER=kafka
-      - SPRING_CLOUD_STREAM_BINDINGS_INPUT_CONSUMER_PARTITIONED=true
-      - SPRING_CLOUD_STREAM_BINDINGS_INPUT_CONSUMER_INSTANCECOUNT=2
-      - SPRING_CLOUD_STREAM_BINDINGS_INPUT_CONSUMER_INSTANCEINDEX=1
-    depends_on:
-      mysql:
-        condition: service_healthy
-      kafka:
-        condition: service_started
-
-  product-composite:
-    build: microservices/product-composite-service
-    mem_limit: 350m
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-      - MANAGEMENT_HEALTH_RABBIT_ENABLED=false
-      - SPRING_CLOUD_STREAM_DEFAULTBINDER=kafka
-      - SPRING_CLOUD_STREAM_BINDINGS_OUTPUT-PRODUCTS_PRODUCER_PARTITION-KEY-EXPRESSION=payload.key
-      - SPRING_CLOUD_STREAM_BINDINGS_OUTPUT-PRODUCTS_PRODUCER_PARTITION-COUNT=2
-      - SPRING_CLOUD_STREAM_BINDINGS_OUTPUT-RECOMMENDATIONS_PRODUCER_PARTITION-KEY-EXPRESSION=payload.key
-      - SPRING_CLOUD_STREAM_BINDINGS_OUTPUT-RECOMMENDATIONS_PRODUCER_PARTITION-COUNT=2
-      - SPRING_CLOUD_STREAM_BINDINGS_OUTPUT-REVIEWS_PRODUCER_PARTITION-KEY-EXPRESSION=payload.key
-      - SPRING_CLOUD_STREAM_BINDINGS_OUTPUT-REVIEWS_PRODUCER_PARTITION-COUNT=2
-    depends_on:
-      - kafka
 
   eureka:
     build: spring-cloud/eureka-server
@@ -126,23 +64,6 @@ services:
     command: mongod --smallfiles
     healthcheck:
       test: "mongo --eval 'db.stats().ok'"
-      interval: 20s
-      timeout: 5s
-      retries: 10
-
-  # $ mysql -uroot -h127.0.0.1 -p
-  mysql:
-    image: mysql:5.7
-    mem_limit: 350m
-    ports:
-      - "3306:3306"
-    environment:
-      - MYSQL_ROOT_PASSWORD=rootpwd
-      - MYSQL_DATABASE=review-db
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=pwd
-    healthcheck:
-      test: "/usr/bin/mysql --user=user --password=pwd --execute \"SHOW DATABASES;\""
       interval: 20s
       timeout: 5s
       retries: 10

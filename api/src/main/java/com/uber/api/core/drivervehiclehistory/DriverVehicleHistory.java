@@ -1,19 +1,21 @@
-package com.uber.api.core.history;
+package com.uber.api.core.drivervehiclehistory;
 
 import java.time.LocalDate;
 
-public class History {
+public class DriverVehicleHistory {
     private int driverId;
     private int vehicleId;
     private LocalDate dateFrom;
     private LocalDate dateTo;
 
-    public History() {
+    public DriverVehicleHistory() {
         driverId = 0;
         vehicleId = 0;
+        dateFrom = null;
+        dateTo = null;
     }
 
-    public History(int driverId, int vehicleId, LocalDate dateFrom, LocalDate dateTo) {
+    public DriverVehicleHistory(int driverId, int vehicleId, LocalDate dateFrom, LocalDate dateTo) {
         this.driverId = driverId;
         this.vehicleId = vehicleId;
         this.dateFrom = dateFrom;
