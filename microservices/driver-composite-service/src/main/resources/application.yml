@@ -1,0 +1,65 @@
+api:
+
+  common:
+    version: 1.0.0
+    title: Sample API
+    description: Description of the API...
+    termsOfServiceUrl: MINE TERMS OF SERVICE URL
+    license: License
+    licenseUrl: MY LICENSE URL
+
+    contact:
+      name: Contact
+      url: My
+      email: me@mail.com
+
+  driver-composite:
+
+    get-composite-driver:
+      description: Returns a composite view of the specified driver id
+      notes: |
+        # Normal response
+        If the requested driver id is found the method will return information regarding:
+        1. Driver information
+        1. Reviews
+        1. Recommendations
+        1. Service Addresses
+        (technical information regarding the addresses of the microservices that created the response)
+
+        # Expected partial and error responses
+        1. If no driver information is found, a <b>404 - Not Found</b> error will be returned
+        1. In no recommendations or reviews are found for a driver, a partial response will be returned
+
+server.port: 7000
+
+app:
+  driver-service:
+    host: localhost
+    port: 7001
+  driver-vehicle-history-service:
+    host: localhost
+    port: 7002
+  trip-service:
+    host: driver-vehicle-history
+    port: 7004
+
+logging:
+  level:
+    root: INFO
+    se.magnus: DEBUG
+
+---
+spring.profiles: docker
+
+server.port: 8080
+
+app:
+  driver-service:
+    host: driver
+    port: 8080
+  driver-vehicle-history-service:
+    host: driver-vehicle-history
+    port: 8080
+  trip-history-service:
+    host: driver-vehicle-history
+    port: 8080
