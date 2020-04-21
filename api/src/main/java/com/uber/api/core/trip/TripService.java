@@ -1,18 +1,16 @@
 package com.uber.api.core.trip;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 public interface TripService {
-
     /**
      * Sample usage:
      *
      * curl -X POST $HOST:$PORT/trip \
      *   -H "Content-Type: application/json" --data \
-     *   '{"productId":123,"name":"product 123","phoneNo":123}'
+     *   '{"productId":123,"recommendationId":456,"author":"me","rate":5,"content":"yada, yada, yada"}'
      *
      * @param body
      * @return
@@ -24,15 +22,25 @@ public interface TripService {
     Trip createTrip(@RequestBody Trip body);
 
     /**
-     * Sample usage: curl $HOST:$PORT/trip/1
+     * Sample usage:
      *
-     * @param tripId
-     * @return the trip, if found, else null
+     * curl $HOST:$PORT/trip?productId=1
+     *
+     * @param driverId
+     * @return
      */
     @GetMapping(
-        value    = "/trip/{tripId}",
-        produces = "application/json")
-    Trip getTrip(@PathVariable int tripId);
+            value    = "/trips",
+            produces = "application/json")
+    List<Trip> getTrips(@RequestParam(value = "driverId", required = true) int driverId);
 
-    void deleteTrip(@PathVariable int tripId);
+    /**
+     * Sample usage:
+     *
+     * curl -X DELETE $HOST:$PORT/trip?productId=1
+     *
+     * @param driverId
+     */
+    @DeleteMapping(value = "/trip")
+    void deleteTrips(@RequestParam(value = "driverId", required = true)  int driverId);
 }

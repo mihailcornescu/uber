@@ -6,17 +6,19 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Mappings;
 
+import java.util.List;
+
 @Mapper(componentModel = "spring")
 public interface VehicleMapper {
 
-    @Mappings({
-            @Mapping(target = "registerTimestamp", ignore = true)
-    })
     Vehicle entityToApi(VehicleEntity entity);
 
     @Mappings({
-        @Mapping(target = "id", ignore = true),
-        @Mapping(target = "version", ignore = true)
+            @Mapping(target = "id", ignore = true),
+            @Mapping(target = "version", ignore = true)
     })
     VehicleEntity apiToEntity(Vehicle api);
+
+    List<Vehicle> entityListToApiList(List<VehicleEntity> entity);
+    List<VehicleEntity> apiListToEntityList(List<Vehicle> api);
 }

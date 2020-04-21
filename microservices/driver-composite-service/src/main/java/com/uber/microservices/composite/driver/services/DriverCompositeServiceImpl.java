@@ -1,7 +1,7 @@
 package com.uber.microservices.composite.driver.services;
 
 import com.uber.api.core.driver.Driver;
-import com.uber.api.core.drivervehiclehistory.DriverVehicleHistory;
+import com.uber.api.core.vehicle.Vehicle;
 import com.uber.api.core.trip.Trip;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ public class DriverCompositeServiceImpl implements DriverCompositeService {
         Driver driver = integration.getDriver(driverId);
         if (driver == null) throw new NotFoundException("No driver found for driverId: " + driverId);
 
-        List<DriverVehicleHistory> vehicleHistory = integration.getVechileHistory(driverId);
+        List<Vehicle> vehicleHistory = integration.getVechileHistory(driverId);
 
         List<Trip> trips = integration.getTrips(driverId);
 
@@ -41,7 +41,7 @@ public class DriverCompositeServiceImpl implements DriverCompositeService {
         return createDriverAggregate(driver, vehicleHistory, trips);
     }
 
-    private DriverAggregate createDriverAggregate(Driver driver, List<DriverVehicleHistory> vehicleHistory, List<Trip> trips) {
+    private DriverAggregate createDriverAggregate(Driver driver, List<Vehicle> vehicleHistory, List<Trip> trips) {
 
         // 1. Setup driver info
         int driverId = driver.getDriverId();

@@ -2,7 +2,7 @@ package com.uber.microservices.composite.driver;
 
 import com.uber.api.composite.driver.DriverAggregate;
 import com.uber.api.core.driver.Driver;
-import com.uber.api.core.drivervehiclehistory.DriverVehicleHistory;
+import com.uber.api.core.vehicle.Vehicle;
 import com.uber.api.core.trip.Trip;
 import com.uber.microservices.composite.driver.services.DriverCompositeIntegration;
 import com.uber.util.Constants;
@@ -47,7 +47,7 @@ public class DriverCompositeServiceApplicationTests {
 		when(compositeIntegration.getDriver(DRIVER_ID_OK)).
 			thenReturn(new Driver(DRIVER_ID_OK, "name", "phone"));
 		when(compositeIntegration.getVechileHistory(DRIVER_ID_OK)).
-			thenReturn(singletonList(new DriverVehicleHistory(DRIVER_ID_OK, 1, LocalDate.now(), Constants.END_OF_DATE)));
+			thenReturn(singletonList(new Vehicle().setDriverId(DRIVER_ID_OK).setVehicleId(1).setDateFrom(LocalDate.now()).setDateTo(Constants.END_OF_DATE)));
 		when(compositeIntegration.getTrips(DRIVER_ID_OK)).
 				thenReturn(singletonList(new Trip().setDriverId(DRIVER_ID_OK).setTripId(1).setStartLocation("sl1").setEndLocation("sl2")));
 

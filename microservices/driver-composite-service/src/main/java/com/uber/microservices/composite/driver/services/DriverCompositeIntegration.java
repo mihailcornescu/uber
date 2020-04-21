@@ -2,7 +2,7 @@ package com.uber.microservices.composite.driver.services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.uber.api.core.driver.Driver;
-import com.uber.api.core.drivervehiclehistory.DriverVehicleHistory;
+import com.uber.api.core.vehicle.Vehicle;
 import com.uber.api.core.trip.Trip;
 import com.uber.util.exceptions.InvalidInputException;
 import com.uber.util.exceptions.NotFoundException;
@@ -72,13 +72,13 @@ public class DriverCompositeIntegration {
         }
     }
 
-    public List<DriverVehicleHistory> getVechileHistory(int driverId) {
+    public List<Vehicle> getVechileHistory(int driverId) {
 
         try {
             String url = driverVehicleHistoryServiceUrl + "?driverId=" + driverId;
 
             LOG.debug("Will call the getRecommendations API on URL: {}", url);
-            List<DriverVehicleHistory> recommendations = restTemplate.exchange(url, GET, null, new ParameterizedTypeReference<List<DriverVehicleHistory>>() {}).getBody();
+            List<Vehicle> recommendations = restTemplate.exchange(url, GET, null, new ParameterizedTypeReference<List<Vehicle>>() {}).getBody();
 
             LOG.debug("Found {} recommendations for a driver with id: {}", recommendations.size(), driverId);
             return recommendations;

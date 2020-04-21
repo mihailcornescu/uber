@@ -11,8 +11,10 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.Optional;
+import java.time.LocalDate;
+import java.util.List;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.*;
 
 @RunWith(SpringRunner.class)
@@ -28,32 +30,33 @@ public class PersistenceTests {
    	public void setupDb() {
         repository.deleteAll();
 
-        VehicleEntity entity = new VehicleEntity(1, "n", "c", "r");
+        VehicleEntity entity = new VehicleEntity(1, 2, LocalDate.of(2019, 01, 01), LocalDate.now());
         savedEntity = repository.save(entity);
 
-        areDriverEqual(entity, savedEntity);
+        assertEqualsRecommendation(entity, savedEntity);
     }
 
 
     @Test
    	public void create() {
-        VehicleEntity newEntity = new VehicleEntity(2, "n", "c", "r");
+
+        VehicleEntity newEntity = new VehicleEntity(1, 3, LocalDate.of(2019, 06, 01), LocalDate.now());
         repository.save(newEntity);
 
         VehicleEntity foundEntity = repository.findById(newEntity.getId()).get();
-        areDriverEqual(newEntity, foundEntity);
+        assertEqualsRecommendation(newEntity, foundEntity);
 
         assertEquals(2, repository.count());
     }
 
     @Test
    	public void update() {
-        savedEntity.setName("n2");
+        savedEntity.setDateFrom(LocalDate.of(2020,01,01));
         repository.save(savedEntity);
 
         VehicleEntity foundEntity = repository.findById(savedEntity.getId()).get();
         assertEquals(1, (long)foundEntity.getVersion());
-        assertEquals("n2", foundEntity.getName());
+        assertEquals(LocalDate.of(2020,01,01), foundEntity.getDateFrom());
     }
 
     @Test
@@ -63,16 +66,17 @@ public class PersistenceTests {
     }
 
     @Test
-   	public void getByDriverId() {
-        Optional<VehicleEntity> entity = repository.findByVehicleId(savedEntity.getVehicleId());
+   	public void getByProductId() {
+        List<VehicleEntity> entityList = repository.findByDriverId(savedEntity.getDriverId());
 
-        assertTrue(entity.isPresent());
-        areDriverEqual(savedEntity, entity.get());
+        assertThat(entityList, hasSize(1));
+        assertEqualsRecommendation(savedEntity, entityList.get(0));
     }
 
     @Test(expected = DuplicateKeyException.class)
    	public void duplicateError() {
-        VehicleEntity entity = new VehicleEntity(savedEntity.getVehicleId(), "n", "c", "r");
+        VehicleEntity entity = new VehicleEntity(1, 2, LocalDate.of(2019, 01, 01), LocalDate.now());
+
         repository.save(entity);
     }
 
@@ -84,13 +88,13 @@ public class PersistenceTests {
         VehicleEntity entity2 = repository.findById(savedEntity.getId()).get();
 
         // Update the entity using the first entity object
-        entity1.setName("n1");
+        entity1.setDateFrom(LocalDate.of(2020,01,01));
         repository.save(entity1);
 
         //  Update the entity using the second entity object.
         // This should fail since the second entity now holds a old version number, i.e. a Optimistic Lock Error
         try {
-            entity2.setName("n2");
+            entity2.setDateFrom(LocalDate.of(2019, 07, 01));
             repository.save(entity2);
 
             fail("Expected an OptimisticLockingFailureException");
@@ -99,14 +103,15 @@ public class PersistenceTests {
         // Get the updated entity from the database and verify its new sate
         VehicleEntity updatedEntity = repository.findById(savedEntity.getId()).get();
         assertEquals(1, (int)updatedEntity.getVersion());
-        assertEquals("n1", updatedEntity.getName());
+        assertEquals(LocalDate.of(2020, 01, 01), updatedEntity.getDateFrom());
     }
 
-    private boolean areDriverEqual(VehicleEntity expectedEntity, VehicleEntity actualEntity) {
-        return
-            (expectedEntity.getId().equals(actualEntity.getId())) &&
-            (expectedEntity.getVersion() == actualEntity.getVersion()) &&
-            (expectedEntity.getVehicleId() == actualEntity.getVehicleId()) &&
-            (expectedEntity.getName().equals(actualEntity.getName()));
+    private void assertEqualsRecommendation(VehicleEntity expectedEntity, VehicleEntity actualEntity) {
+        assertEquals(expectedEntity.getId(),               actualEntity.getId());
+        assertEquals(expectedEntity.getVersion(),          actualEntity.getVersion());
+        assertEquals(expectedEntity.getDriverId(),        actualEntity.getDriverId());
+        assertEquals(expectedEntity.getVehicleId(), actualEntity.getVehicleId());
+        assertEquals(expectedEntity.getDateFrom(),           actualEntity.getDateFrom());
+        assertEquals(expectedEntity.getDateTo(),          actualEntity.getDateTo());
     }
 }

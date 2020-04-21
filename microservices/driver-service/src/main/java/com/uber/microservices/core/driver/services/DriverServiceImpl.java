@@ -42,7 +42,8 @@ public class DriverServiceImpl implements DriverService {
 
         } catch (DuplicateKeyException dke) {
             throw new InvalidInputException("Duplicate key, Driver Id: " + body.getDriverId());
-        }    }
+        }
+    }
 
     @Override
     public Driver getDriver(int driverId) {

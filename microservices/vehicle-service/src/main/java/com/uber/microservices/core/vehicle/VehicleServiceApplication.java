@@ -16,7 +16,6 @@ public class VehicleServiceApplication {
 	private static final Logger LOG = LoggerFactory.getLogger(VehicleServiceApplication.class);
 
 	public static void main(String[] args) {
-
 		ConfigurableApplicationContext ctx = SpringApplication.run(VehicleServiceApplication.class, args);
 
 		String mongodDbHost = ctx.getEnvironment().getProperty("spring.data.mongodb.host");

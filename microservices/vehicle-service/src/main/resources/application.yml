@@ -1,4 +1,4 @@
-server.port: 7001
+server.port: 7002
 
 spring.application.name: vehicle
 
@@ -52,7 +52,7 @@ spring.rabbitmq:
 logging:
   level:
     root: INFO
-    com.uber: DEBUG
+    se.magnus: DEBUG
     org.springframework.data.mongodb.core.MongoTemplate: DEBUG
 
 management.endpoint.health.show-details: "ALWAYS"

@@ -2,14 +2,15 @@ package com.uber.microservices.core.vehicle.persistence;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.Version;
-import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 import static java.lang.String.format;
 
-@Document(collection="vehicles")
+@Document(collection="driver-vehicle-history")
+@CompoundIndex(name = "dv-hist-rec-id", unique = true, def = "{'driverId': 1, 'vehicleId' : 1}")
 public class VehicleEntity {
 
     @Id
@@ -18,28 +19,24 @@ public class VehicleEntity {
     @Version
     private Integer version;
 
-    @Indexed(unique = true)
+    private int driverId;
     private int vehicleId;
-
-    private String name;
-    private String color;
-    private String registrationNumber;
-    private LocalDateTime registerTimestamp;
+    private LocalDate dateFrom;
+    private LocalDate dateTo;
 
     public VehicleEntity() {
     }
 
-    public VehicleEntity(int vehicleId, String name, String color, String registrationNumber) {
+    public VehicleEntity(int driverId, int vehicleId, LocalDate dateFrom, LocalDate dateTo) {
+        this.driverId = driverId;
         this.vehicleId = vehicleId;
-        this.name = name;
-        this.color = color;
-        this.registrationNumber = registrationNumber;
-        this.registerTimestamp = LocalDateTime.now();
+        this.dateFrom = dateFrom;
+        this.dateTo = dateTo;
     }
 
     @Override
     public String toString() {
-        return format("VehicleEntity: %s", vehicleId);
+        return format("VehicleEntity: %s/%d", driverId, vehicleId);
     }
 
     public String getId() {
@@ -50,12 +47,12 @@ public class VehicleEntity {
         return version;
     }
 
-    public int getVehicleId() {
-        return vehicleId;
+    public int getDriverId() {
+        return driverId;
     }
 
-    public String getName() {
-        return name;
+    public int getVehicleId() {
+        return vehicleId;
     }
 
     public void setId(String id) {
@@ -66,32 +63,27 @@ public class VehicleEntity {
         this.version = version;
     }
 
+    public void setDriverId(int driverId) {
+        this.driverId = driverId;
+    }
+
     public void setVehicleId(int vehicleId) {
         this.vehicleId = vehicleId;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public LocalDate getDateFrom() {
+        return dateFrom;
     }
 
-    public String getColor() {
-        return color;
+    public void setDateFrom(LocalDate dateFrom) {
+        this.dateFrom = dateFrom;
     }
 
-    public void setColor(String color) {
-        this.color = color;
+    public LocalDate getDateTo() {
+        return dateTo;
     }
 
-    public String getRegistrationNumber() {
-        return registrationNumber;
-    }
-
-    public void setRegistrationNumber(String registrationNumber) {
-        this.registrationNumber = registrationNumber;
-    }
-
-    public LocalDateTime getRegisterTimestamp() {
-        return registerTimestamp;
+    public void setDateTo(LocalDate dateTo) {
+        this.dateTo = dateTo;
     }
 }
-

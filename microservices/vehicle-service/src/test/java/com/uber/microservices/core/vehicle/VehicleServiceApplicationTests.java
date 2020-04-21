@@ -1,6 +1,8 @@
 package com.uber.microservices.core.vehicle;
 
+import com.uber.api.core.vehicle.Vehicle;
 import com.uber.microservices.core.vehicle.persistence.VehicleRepository;
+import com.uber.util.Constants;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,27 +11,23 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.stream.messaging.Sink;
 import org.springframework.http.HttpStatus;
 import org.springframework.integration.channel.AbstractMessageChannel;
-import org.springframework.messaging.MessagingException;
-import org.springframework.messaging.support.GenericMessage;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.reactive.server.WebTestClient;
-import com.uber.api.core.vehicle.Vehicle;
-import com.uber.api.event.Event;
-import com.uber.util.exceptions.InvalidInputException;
 
-import static org.junit.Assert.*;
+import java.time.LocalDate;
+
+import static org.junit.Assert.assertEquals;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT;
 import static org.springframework.http.HttpStatus.*;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static com.uber.api.event.Event.Type.CREATE;
-import static com.uber.api.event.Event.Type.DELETE;
+import static org.springframework.http.MediaType.*;
+import static reactor.core.publisher.Mono.just;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment=RANDOM_PORT, properties = {"spring.data.mongodb.port: 0", "eureka.client.enabled=false"})
 public class VehicleServiceApplicationTests {
 
-    @Autowired
-    private WebTestClient client;
+	@Autowired
+	private WebTestClient client;
 
 	@Autowired
 	private VehicleRepository repository;
@@ -41,114 +39,125 @@ public class VehicleServiceApplicationTests {
 
 	@Before
 	public void setupDb() {
-		input = (AbstractMessageChannel) channels.input();
 		repository.deleteAll();
 	}
 
 	@Test
-	public void getVehicleById() {
+	public void getDriverVehicleHistoryByDriverId() {
 
-		int vehicleId = 1;
+		int driverId = 1;
 
-		assertFalse(repository.findByVehicleId(vehicleId).isPresent());
-		assertEquals(0, (long)repository.count());
+		postAndVerifyDriverVehicleHistory(driverId, 1, OK);
+		postAndVerifyDriverVehicleHistory(driverId, 2, OK);
+		postAndVerifyDriverVehicleHistory(driverId, 3, OK);
 
-		sendCreateVehicleEvent(vehicleId);
+		assertEquals(3, repository.findByDriverId(driverId).size());
 
-		assertNotNull(repository.findByVehicleId(vehicleId));
-		assertEquals(1, (long)repository.count());
-
-		getAndVerifyVehicle("/" + String.valueOf(vehicleId), OK)
-            .jsonPath("$.vehicleId").isEqualTo(vehicleId);
+		getAndVerifyDriverVehicleHistoryByDriverId(driverId, OK)
+				.jsonPath("$.length()").isEqualTo(3)
+				.jsonPath("$[2].driverId").isEqualTo(driverId)
+				.jsonPath("$[2].vehicleId").isEqualTo(3);
 	}
 
 	@Test
 	public void duplicateError() {
 
+		int driverId = 1;
 		int vehicleId = 1;
 
-		assertFalse(repository.findByVehicleId(vehicleId).isPresent());
+		postAndVerifyDriverVehicleHistory(driverId, vehicleId, OK)
+				.jsonPath("$.driverId").isEqualTo(driverId)
+				.jsonPath("$.vehicleId").isEqualTo(vehicleId);
 
-		sendCreateVehicleEvent(vehicleId);
+		assertEquals(1, repository.count());
 
-		assertNotNull(repository.findByVehicleId(vehicleId));
+		postAndVerifyDriverVehicleHistory(driverId, vehicleId, UNPROCESSABLE_ENTITY)
+				.jsonPath("$.path").isEqualTo("/driver-vehicle-history")
+				.jsonPath("$.message").isEqualTo("Duplicate key, Driver Id: 1, Vehicle Id:1");
 
-		try {
-			sendCreateVehicleEvent(vehicleId);
-			fail("Expected a MessagingException here!");
-		} catch (MessagingException me) {
-			if (me.getCause() instanceof InvalidInputException)	{
-				InvalidInputException iie = (InvalidInputException)me.getCause();
-				assertEquals("Duplicate key, Vehicle Id: " + vehicleId, iie.getMessage());
-			} else {
-				fail("Expected a InvalidInputException as the root cause!");
-			}
-		}
+		assertEquals(1, repository.count());
 	}
 
 	@Test
-	public void deleteVehicle() {
+	public void deleteDriversVehicleHistory() {
 
+		int driverId = 1;
 		int vehicleId = 1;
 
-		sendCreateVehicleEvent(vehicleId);
-		assertNotNull(repository.findByVehicleId(vehicleId));
+		postAndVerifyDriverVehicleHistory(driverId, vehicleId, OK);
+		assertEquals(1, repository.findByDriverId(driverId).size());
 
-		sendDeleteVehicleEvent(vehicleId);
-		assertFalse(repository.findByVehicleId(vehicleId).isPresent());
+		deleteAndVerifyDriverVehicleHistoryByDriverId(driverId, OK);
+		assertEquals(0, repository.findByDriverId(driverId).size());
 
-		sendDeleteVehicleEvent(vehicleId);
+		deleteAndVerifyDriverVehicleHistoryByDriverId(driverId, OK);
 	}
 
 	@Test
-	public void getVehicleInvalidParameterString() {
+	public void getDriverVehicleHistoryMissingParameter() {
 
-		getAndVerifyVehicle("/no-integer", BAD_REQUEST)
-            .jsonPath("$.path").isEqualTo("/vehicle/no-integer")
-            .jsonPath("$.message").isEqualTo("Type mismatch.");
+		getAndVerifyDriverVehicleHistoryByDriverId("", BAD_REQUEST)
+				.jsonPath("$.path").isEqualTo("/driver-vehicle-history")
+				.jsonPath("$.message").isEqualTo("Required int parameter 'driverId' is not present");	}
+
+	@Test
+	public void getDriverVehicleHistoryInvalidParameter() {
+
+		getAndVerifyDriverVehicleHistoryByDriverId("?driverId=no-integer", BAD_REQUEST)
+				.jsonPath("$.path").isEqualTo("/driver-vehicle-history")
+				.jsonPath("$.message").isEqualTo("Type mismatch.");
 	}
 
 	@Test
-	public void getVehicleNotFound() {
+	public void getDriversVehicleHistoryNotFound() {
 
-		int vehicleIdNotFound = 13;
-		getAndVerifyVehicle(vehicleIdNotFound, NOT_FOUND)
-            .jsonPath("$.path").isEqualTo("/vehicle/" + vehicleIdNotFound)
-            .jsonPath("$.message").isEqualTo("No vehicle found for vehicleId: " + vehicleIdNotFound);
+		getAndVerifyDriverVehicleHistoryByDriverId("?driverId=113", OK)
+				.jsonPath("$.length()").isEqualTo(0);
 	}
 
 	@Test
-	public void getVehicleInvalidParameterNegativeValue() {
+	public void getDriverVehicleHistoryInvalidParameterNegativeValue() {
 
-        int vehicleIdInvalid = -1;
+		int driverIdInvalid = -1;
 
-		getAndVerifyVehicle(vehicleIdInvalid, UNPROCESSABLE_ENTITY)
-            .jsonPath("$.path").isEqualTo("/vehicle/" + vehicleIdInvalid)
-            .jsonPath("$.message").isEqualTo("Invalid vehicleId: " + vehicleIdInvalid);
+		getAndVerifyDriverVehicleHistoryByDriverId("?driverId=" + driverIdInvalid, UNPROCESSABLE_ENTITY)
+				.jsonPath("$.path").isEqualTo("/driver-vehicle-history")
+				.jsonPath("$.message").isEqualTo("Invalid driverId: " + driverIdInvalid);
 	}
 
-	private WebTestClient.BodyContentSpec getAndVerifyVehicle(int vehicleId, HttpStatus expectedStatus) {
-		return getAndVerifyVehicle("/" + vehicleId, expectedStatus);
+	private WebTestClient.BodyContentSpec getAndVerifyDriverVehicleHistoryByDriverId(int driverId, HttpStatus expectedStatus) {
+		return getAndVerifyDriverVehicleHistoryByDriverId("?driverId=" + driverId, expectedStatus);
 	}
 
-	private WebTestClient.BodyContentSpec getAndVerifyVehicle(String vehicleIdPath, HttpStatus expectedStatus) {
+	private WebTestClient.BodyContentSpec getAndVerifyDriverVehicleHistoryByDriverId(String driverIdQuery, HttpStatus expectedStatus) {
 		return client.get()
-			.uri("vehicle" + vehicleIdPath)
-			.accept(APPLICATION_JSON)
-			.exchange()
-			.expectStatus().isEqualTo(expectedStatus)
-			.expectHeader().contentType(APPLICATION_JSON)
-			.expectBody();
+				.uri("/driver-vehicle-history" + driverIdQuery)
+				.accept(APPLICATION_JSON)
+				.exchange()
+				.expectStatus().isEqualTo(expectedStatus)
+				.expectHeader().contentType(APPLICATION_JSON)
+				.expectBody();
 	}
 
-	private void sendCreateVehicleEvent(int vehicleId) {
-		Vehicle vehicle = new Vehicle(vehicleId, "Name " + vehicleId, "color" + vehicleId, "registrationNumber" + vehicleId);
-		Event<Integer, Vehicle> event = new Event(CREATE, vehicleId, vehicle);
-		input.send(new GenericMessage<>(event));
+	private WebTestClient.BodyContentSpec postAndVerifyDriverVehicleHistory(int driverId, int vehicleId, HttpStatus expectedStatus) {
+		Vehicle history = new Vehicle().setDriverId(driverId).setVehicleId(vehicleId).setDateFrom(LocalDate.now())
+				.setDateFrom(Constants.END_OF_DATE);
+		return client.post()
+				.uri("/driver-vehicle-history")
+				.body(just(history), Vehicle.class)
+				.accept(APPLICATION_JSON)
+				.exchange()
+				.expectStatus().isEqualTo(expectedStatus)
+				.expectHeader().contentType(APPLICATION_JSON)
+				.expectBody();
 	}
 
-	private void sendDeleteVehicleEvent(int vehicleId) {
-		Event<Integer, Vehicle> event = new Event(DELETE, vehicleId, null);
-		input.send(new GenericMessage<>(event));
+	private WebTestClient.BodyContentSpec deleteAndVerifyDriverVehicleHistoryByDriverId(int driverId, HttpStatus expectedStatus) {
+		return client.delete()
+				.uri("/driver-vehicle-history?driverId=" + driverId)
+				.accept(APPLICATION_JSON)
+				.exchange()
+				.expectStatus().isEqualTo(expectedStatus)
+				.expectBody();
 	}
 }

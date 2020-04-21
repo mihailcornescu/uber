@@ -1,9 +1,9 @@
 package com.uber.microservices.core.vehicle.persistence;
 
-import org.springframework.data.repository.PagingAndSortingRepository;
+import org.springframework.data.repository.CrudRepository;
 
-import java.util.Optional;
+import java.util.List;
 
-public interface VehicleRepository extends PagingAndSortingRepository<VehicleEntity, String> {
-    Optional<VehicleEntity> findByVehicleId(int vehicleId);
+public interface VehicleRepository extends CrudRepository<VehicleEntity, String> {
+    List<VehicleEntity> findByDriverId(int driverId);
 }

@@ -1,7 +1,7 @@
 package com.uber.microservices.core.vehicle.services;
 
-import com.uber.api.core.vehicle.VehicleService;
 import com.uber.api.core.vehicle.Vehicle;
+import com.uber.api.core.vehicle.VehicleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,11 +16,11 @@ public class MessageProcessor {
 
     private static final Logger LOG = LoggerFactory.getLogger(MessageProcessor.class);
 
-    private final VehicleService service;
+    private final VehicleService vehicleService;
 
     @Autowired
-    public MessageProcessor(VehicleService service) {
-        this.service = service;
+    public MessageProcessor(VehicleService vehicleService) {
+        this.vehicleService = vehicleService;
     }
 
     @StreamListener(target = Sink.INPUT)
@@ -31,15 +31,15 @@ public class MessageProcessor {
         switch (event.getEventType()) {
 
         case CREATE:
-            Vehicle vehicle = event.getData();
-            LOG.info("Create vehicle with ID: {}", vehicle.getVehicleId());
-            service.createVehicle(vehicle);
+            Vehicle history = event.getData();
+            LOG.info("Create history with ID: {}/{}", history.getDriverId(), history.getVehicleId());
+            vehicleService.createDriverVehicleHistory(history);
             break;
 
         case DELETE:
-            int vehicleId = event.getKey();
-            LOG.info("Delete history with vehicleId: {}", vehicleId);
-            service.deleteVehicle(vehicleId);
+            int driverId = event.getKey();
+            LOG.info("Delete driver's vehicle history for driver with DriverID: {}", driverId);
+            vehicleService.deleteDriverVehicleHistory(driverId);
             break;
 
         default:

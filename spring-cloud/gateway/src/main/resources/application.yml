@@ -20,10 +20,31 @@ ribbon.NFLoadBalancerPingInterval: 5
 
 spring.cloud.gateway.routes:
 
-- id: product-composite
-  uri: lb://product-composite
+- id: driver-composite
+  uri: lb://driver-composite
   predicates:
-  - Path=/product-composite/**
+  - Path=/driver-composite/**
+
+- id: driver
+  uri: lb://driver
+  predicates:
+    - Path=/driver/**
+
+- id: vehicle
+  uri: lb://vehicle
+  predicates:
+    - Path=/vehicle/**
+
+- id: trip
+  uri: lb://trip
+  predicates:
+    - Path=/trip/**
+
+- id: payment
+  uri: lb://payment
+  predicates:
+    - Path=/payment/**
+
 
 - id: eureka-api
   uri: http://${app.eureka-server}:8761
